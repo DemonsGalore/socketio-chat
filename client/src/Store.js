@@ -1,16 +1,18 @@
 import React, { createContext, useReducer } from 'react';
+import io from 'socket.io-client';
 
 export const Context = createContext();
 
 const reducer = (state, action) => {
-  const { from, msg, topic } = action.payload;
+  const { from, message, topic } = action.payload;
+
   switch (action.type) {
     case 'RECEIVE_MESSAGE':
       return {
         ...state,
         [topic]: [
           ...state[topic],
-          { from, msg }
+          { from, message }
         ]
       }
     default:
@@ -20,21 +22,34 @@ const reducer = (state, action) => {
 
 const initState = {
   general: [
-    { from: 'Andreas', msg: 'general'},
-    { from: 'Andreas', msg: 'Hello'},
-    { from: 'Andreas', msg: 'Hello'},
+    { from: 'Andreas', message: 'general'},
+    { from: 'Andreas', message: 'Hello'},
+    { from: 'Andreas', message: 'Hello'},
   ],
   topic2: [
-    { from: 'Andreas', msg: 'topic2'},
-    { from: 'Andreas', msg: 'Hello'},
+    { from: 'Andreas', message: 'topic2'},
+    { from: 'Andreas', message: 'Hello'},
   ]
 };
 
+let socket;
+
+const sendChatAction = (message) => {
+  socket.emit('message', message);
+};
+
 const Store = (props) => {
-  const reducerHook = useReducer(reducer, initState);
+  const [allChats, dispatch] = useReducer(reducer, initState);
+
+  if (!socket) {
+    socket = io(':5000')
+    socket.on('message', (message) => {
+      dispatch({ type: 'RECEIVE_MESSAGE', payload: message });
+    });
+  }
 
   return (
-    <Context.Provider value={reducerHook}>
+    <Context.Provider value={{allChats, sendChatAction}}>
       {props.children}
     </Context.Provider>
   );
