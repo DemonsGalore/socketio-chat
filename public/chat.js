@@ -1,5 +1,6 @@
 // make connection
-const socket = io.connect('http://localhost:5000');
+// const socket = io.connect('http://localhost:5000');
+const socket = io.connect('http://192.168.0.20:5000');
 
 const message = document.getElementById('message');
 const username = document.getElementById('username');
@@ -15,7 +16,7 @@ send.addEventListener('click', () => {
   });
 });
 
-message.addEventListener('keypress', () => {
+message.addEventListener('keyup', () => {
   socket.emit('typing', username.value);
 });
 
