@@ -1,6 +1,6 @@
 import React from 'react';
 
-const VideoStreaming = props => {
+const VideoStreaming = () => {
   return (
     <h1>VideoStreaming</h1>
   );
