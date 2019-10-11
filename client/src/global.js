@@ -26,4 +26,7 @@ export default createGlobalStyle`
     flex-grow: 1;
     padding: 1rem;
   }
+  h1 {
+    color: ${({ theme }) => theme.secondary};
+  }
 `;
