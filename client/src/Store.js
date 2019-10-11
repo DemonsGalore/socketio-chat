@@ -8,35 +8,52 @@ const reducer = (state, action) => {
 
   switch (action.type) {
     case 'RECEIVE_MESSAGE':
-      return {
+      let index = state.findIndex(chat => chat.topic === topic);
+
+      state[index].messages.push({ from, message });
+
+      return [
         ...state,
-        [topic]: [
-          ...state[topic],
-          { from, message }
-        ]
-      }
+      ];
+    case 'USER_TYPING':
+      //console.log("user typing reducer", action.payload);
+      return [
+        ...state
+      ]
     default:
       return state;
   }
 };
 
-const initState = {
-  general: [
-    { from: 'Andreas', message: 'general'},
-    { from: 'Andreas', message: 'Hello'},
-    { from: 'Andreas', message: 'Hello'},
-  ],
-  topic2: [
-    { from: 'Andreas', message: 'topic2'},
-    { from: 'Andreas', message: 'Hello'},
-  ]
-};
+const initState = [
+  {
+    topic: 'general',
+    messages: [
+      { from: 'Andreas', message: 'general'},
+      { from: 'Andreas', message: 'Hello'},
+      { from: 'Andreas', message: 'Hello'},
+    ],
+    typing: []
+  },
+  {
+    topic: 'topic2',
+    messages: [
+      { from: 'Andreas', message: 'topic2'},
+      { from: 'Andreas', message: 'Hello'},
+    ],
+    typing: []
+  }
+];
 
 let socket;
 
 const sendChatAction = (message) => {
   socket.emit('message', message);
 };
+
+const userTyping = (data) => {
+  socket.emit('typing', data);
+}
 
 const Store = (props) => {
   const [allChats, dispatch] = useReducer(reducer, initState);
@@ -46,10 +63,14 @@ const Store = (props) => {
     socket.on('message', (message) => {
       dispatch({ type: 'RECEIVE_MESSAGE', payload: message });
     });
+
+    socket.on('typing', (message) => {
+      //dispatch({ type: 'USER_TYPING', payload: message });
+    });
   }
 
   return (
-    <Context.Provider value={{allChats, sendChatAction}}>
+    <Context.Provider value={{allChats, sendChatAction, userTyping}}>
       {props.children}
     </Context.Provider>
   );

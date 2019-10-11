@@ -4,8 +4,8 @@ import { StyledChat } from './Chat.styled';
 
 const Chat = () => {
   // context store
-  const { allChats, sendChatAction } = useContext(Context);
-  const topics = Object.keys(allChats);
+  const { allChats, sendChatAction, userTyping } = useContext(Context);
+  const topics = allChats.map(chat => chat.topic);
 
   // local state
   const [message, setMessage] = useState('');
@@ -25,14 +25,14 @@ const Chat = () => {
       </ul>
       <h3>{activeTopic}</h3>
       <div>
-        {allChats[activeTopic].map((chat, i) => (
+        {allChats.find(chat => chat.topic === activeTopic).messages.map((chat, i) => (
           <div key={i}>
-            <label>{chat.from}</label>
+            <label><strong>{chat.from}</strong></label>
             {chat.message}
           </div>
         ))}
       </div>
-      <input type="text" value={message} onChange={e => setMessage(e.target.value)} />
+      <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyUp={() => userTyping({ from: username, topic: activeTopic })} />
       <button type="button" onClick={() => {
         sendChatAction({ from: username, message, topic: activeTopic });
         setMessage('');

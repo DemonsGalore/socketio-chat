@@ -17,15 +17,11 @@ const server = app.listen(PORT, () => console.log(`Server started at http://loca
 const io = socket(server);
 
 io.on('connection', (socket) => {
-  console.log('Socket connected.', socket.id);
   socket.on('message', (message) => {
-    console.log(JSON.stringify(message));
-    io.emit('message', message)
+    io.emit('message', message);
   });
 
-  /*
-  socket.on('typing', (username) => {
-    socket.broadcast.emit('typing', username);
+  socket.on('typing', (data) => {
+    socket.broadcast.emit('typing', data);
   });
-  */
 });
