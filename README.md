@@ -1,6 +1,7 @@
 # video-streaming-chat
 
-
 TODO:
-- show typing and remove typing if typing is stopped
-- multiple clients typing
+- show user who joined/left chat
+- set username before joining
+- show all connected users
+- show typing problem if chatroom is change before 3sec after last typing

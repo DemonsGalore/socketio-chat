@@ -24,4 +24,8 @@ io.on('connection', (socket) => {
   socket.on('typing', (data) => {
     socket.broadcast.emit('typing', data);
   });
+
+  socket.on('stopped-typing', (data) => {
+    socket.broadcast.emit('stopped-typing', data);
+  });
 });

@@ -4,13 +4,25 @@ import { StyledChat } from './Chat.styled';
 
 const Chat = () => {
   // context store
-  const { allChats, sendChatAction, userTyping } = useContext(Context);
+  const { allChats, sendChatAction, userTyping, userStoppedTyping } = useContext(Context);
   const topics = allChats.map(chat => chat.topic);
 
   // local state
   const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
   const [activeTopic, setActiveTopic] = useState(topics[0]);
+  const [timer, setTimer] = useState();
+  
+  let activeChat = allChats.find(chat => chat.topic === activeTopic);
+  let isUserTyping = activeChat.typing.length > 0;
+
+  // refresh timer while user is typing; send data to store after timeout
+  const setTypingTimer = () => {
+    clearTimeout(timer);
+    setTimer(setTimeout(() => {
+      userStoppedTyping({ from: username, topic: activeTopic });
+    }, 3000));
+  }
 
   return (
     <StyledChat>
@@ -25,14 +37,21 @@ const Chat = () => {
       </ul>
       <h3>{activeTopic}</h3>
       <div>
-        {allChats.find(chat => chat.topic === activeTopic).messages.map((chat, i) => (
+        {activeChat.messages.map((chat, i) => (
           <div key={i}>
             <label><strong>{chat.from}</strong></label>
             {chat.message}
           </div>
         ))}
       </div>
-      <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyUp={() => userTyping({ from: username, topic: activeTopic })} />
+      {isUserTyping && <div><em>
+        {activeChat.typing.length > 1 ? (activeChat.typing.join(', ') + ' are typing') : (activeChat.typing[0] + ' is typing')}
+      </em></div>}
+
+      <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyUp={() => {
+        userTyping({ from: username, topic: activeTopic });
+        setTypingTimer();
+      }} />
       <button type="button" onClick={() => {
         sendChatAction({ from: username, message, topic: activeTopic });
         setMessage('');

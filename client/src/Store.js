@@ -5,21 +5,23 @@ export const Context = createContext();
 
 const reducer = (state, action) => {
   const { from, message, topic } = action.payload;
+  let index;
 
   switch (action.type) {
     case 'RECEIVE_MESSAGE':
-      let index = state.findIndex(chat => chat.topic === topic);
-
+      index = state.findIndex(chat => chat.topic === topic);
       state[index].messages.push({ from, message });
-
-      return [
-        ...state,
-      ];
+      return [...state];
     case 'USER_TYPING':
-      //console.log("user typing reducer", action.payload);
-      return [
-        ...state
-      ]
+      index = state.findIndex(chat => chat.topic === topic);
+      if (!state[index].typing.includes(from)) {
+        state[index].typing.push(from);
+      }
+      return [...state];
+    case 'USER_STOPPED_TYPING':
+      index = state.findIndex(chat => chat.topic === topic);
+      state[index].typing.splice(state[index].typing.indexOf(from), 1);
+      return [...state];
     default:
       return state;
   }
@@ -53,7 +55,11 @@ const sendChatAction = (message) => {
 
 const userTyping = (data) => {
   socket.emit('typing', data);
-}
+};
+
+const userStoppedTyping = (data) => {
+  socket.emit('stopped-typing', data);
+};
 
 const Store = (props) => {
   const [allChats, dispatch] = useReducer(reducer, initState);
@@ -65,12 +71,16 @@ const Store = (props) => {
     });
 
     socket.on('typing', (message) => {
-      //dispatch({ type: 'USER_TYPING', payload: message });
+      dispatch({ type: 'USER_TYPING', payload: message });
+    });
+
+    socket.on('stopped-typing', (message) => {
+      dispatch({ type: 'USER_STOPPED_TYPING', payload: message });
     });
   }
 
   return (
-    <Context.Provider value={{allChats, sendChatAction, userTyping}}>
+    <Context.Provider value={{allChats, sendChatAction, userTyping, userStoppedTyping}}>
       {props.children}
     </Context.Provider>
   );
