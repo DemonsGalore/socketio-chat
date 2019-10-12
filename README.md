@@ -6,3 +6,5 @@ TODO:
 - show typing problem if chatroom is changed before 3sec after last typing
 - toast notification (empty username, errors, etc)
 - check for unique usernames
+- password protected chats
+- create new chat rooms

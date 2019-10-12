@@ -1,4 +1,6 @@
 package-lock.json
+/config/keys_dev.js
+
 
 # Logs
 logs
