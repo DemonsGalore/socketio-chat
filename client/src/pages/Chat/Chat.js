@@ -1,21 +1,39 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
+
 import { Context } from '../../Store';
 import { StyledChat } from './Chat.styled';
+import { Spinner } from '../../components';
 
 const Chat = () => {
   // context store
-  const { allChats, sendChatAction, userTyping, userStoppedTyping } = useContext(Context);
+  const { allChats, sendChatAction, userTyping, userStoppedTyping, createNewChat, fetchAllChats } = useContext(Context);
   const topics = allChats.map(chat => chat.topic);
 
   // local state
+  const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
+  const [usernameSelected, setUsernameSelected] = useState(false)
+  const [newTopic, setNewTopic] = useState('');
   const [chatEntered, setChatEntered] = useState(false)
   const [activeTopic, setActiveTopic] = useState(topics[0]);
   const [timer, setTimer] = useState();
   
   let activeChat = allChats.find(chat => chat.topic === activeTopic);
-  let isUserTyping = activeChat.typing.length > 0;
+  
+  let isUserTyping;
+
+  if (activeChat) {
+    isUserTyping = activeChat.typing.length > 0;
+  }
+
+  const isFirstRender = useRef(true);
+
+  if (isFirstRender.current) {
+    isFirstRender.current = false;
+    fetchAllChats();
+    setLoading(false);
+  }
 
   // refresh timer while user is typing; send data to store after timeout
   const setTypingTimer = () => {
@@ -25,29 +43,46 @@ const Chat = () => {
     }, 3000));
   };
 
-  const enterChat = () => {
-    if (username !== '') {
-      setChatEntered(true);
-    }
+  const selectUsername = () => {
+    setUsernameSelected(true);
   };
 
   return (
     <StyledChat>
       <h1>Chat</h1>
-      {!chatEntered ?
-        <>
+      {!usernameSelected ?
+        <div>
+          <label>Username: </label>
           <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
-          <button type="button" onClick={enterChat}>enter chat</button>
-        </>
+          <br />
+          <button type="button" onClick={selectUsername}>select username</button>
+        </div>
       :
-        <>
-          <ul>
-            {topics.map(topic => (
-            <li key={topic} onClick={e => setActiveTopic(e.target.innerText)} className={topic === activeTopic ? 'active' : undefined}>
-              {topic}
-            </li>
-            ))}
-          </ul>
+        <div>
+          {loading ?
+            <Spinner />
+          :
+            <>
+              <ul>
+                {topics.map(topic => (
+                <li key={topic} onClick={e => {
+                  setActiveTopic(e.target.innerText);
+                  setChatEntered(true);
+                }} className={topic === activeTopic ? 'active' : undefined}>
+                  {topic}
+                </li>
+                ))}
+              </ul>
+              <div>
+                <input type="text" value={newTopic} onChange={e => setNewTopic(e.target.value)} />
+                <button type="button" onClick={() => createNewChat(newTopic)}>create new chatroom</button>
+              </div>
+            </>
+          }
+        </div>
+      }
+      {chatEntered && 
+        <div>
           <h3>{activeTopic}</h3>
           <div>
             {activeChat.messages.map((chat, i) => (
@@ -70,7 +105,7 @@ const Chat = () => {
             userStoppedTyping({ from: username, topic: activeTopic });
             setMessage('');
           }}>send</button>
-        </>
+        </div>
       }
     </StyledChat>
   );

@@ -7,4 +7,6 @@ TODO:
 - toast notification (empty username, errors, etc)
 - check for unique usernames
 - password protected chats
-- create new chat rooms
+- highlight chats with new messages
+
+- navigation justify content - end not working in chrome

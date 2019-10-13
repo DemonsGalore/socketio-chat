@@ -1,5 +1,8 @@
 import React, { createContext, useReducer } from 'react';
 import io from 'socket.io-client';
+import axios from 'axios';
+
+import isEmpty from './util/is-empty';
 
 export const Context = createContext();
 
@@ -22,30 +25,14 @@ const reducer = (state, action) => {
       index = state.findIndex(chat => chat.topic === topic);
       state[index].typing.splice(state[index].typing.indexOf(from), 1);
       return [...state];
+    case 'CREATE_NEW_CHAT':
+      return [...state, action.payload];
+    case 'SET_CHAT_DATA':
+      return [...action.payload];
     default:
       return state;
   }
 };
-
-const initState = [
-  {
-    topic: 'general',
-    messages: [
-      { from: 'Andreas', message: 'general'},
-      { from: 'Andreas', message: 'Hello'},
-      { from: 'Andreas', message: 'Hello'},
-    ],
-    typing: []
-  },
-  {
-    topic: 'topic2',
-    messages: [
-      { from: 'Andreas', message: 'topic2'},
-      { from: 'Andreas', message: 'Hello'},
-    ],
-    typing: []
-  }
-];
 
 let socket;
 
@@ -61,11 +48,31 @@ const userStoppedTyping = (data) => {
   socket.emit('stopped-typing', data);
 };
 
+const createNewChat = (data) => {
+  let newTopic;
+  if (isEmpty(data)) {
+    newTopic = 'Room' + Math.floor(Math.random() * 9999).toString();
+  } else {
+    newTopic = data;
+  }
+  socket.emit('create-new-chat', newTopic);
+};
+
 const Store = (props) => {
-  const [allChats, dispatch] = useReducer(reducer, initState);
+  const [allChats, dispatch] = useReducer(reducer, []);
+
+  const fetchAllChats = async () => {
+    try {
+      const result = await axios.get('/api/chat/all');
+      dispatch({ type: 'SET_CHAT_DATA', payload: result.data });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (!socket) {
-    socket = io(':5000')
+    socket = io(':5000');
+
     socket.on('message', (message) => {
       dispatch({ type: 'RECEIVE_MESSAGE', payload: message });
     });
@@ -77,10 +84,14 @@ const Store = (props) => {
     socket.on('stopped-typing', (message) => {
       dispatch({ type: 'USER_STOPPED_TYPING', payload: message });
     });
+
+    socket.on('create-new-chat', (chat) => {
+      dispatch({ type: 'CREATE_NEW_CHAT', payload: chat });
+    });
   }
 
   return (
-    <Context.Provider value={{allChats, sendChatAction, userTyping, userStoppedTyping}}>
+    <Context.Provider value={{allChats, sendChatAction, userTyping, userStoppedTyping, createNewChat, fetchAllChats}}>
       {props.children}
     </Context.Provider>
   );

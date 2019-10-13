@@ -1,27 +1,30 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const chatSchema = new Chat({
+const chatSchema = new Schema({
   topic: {
     type: String,
-    default: 'Room',
     required: true,
   },
   messages: [
     {
       from: {
         type: String,
+        required: true,
       },
       message: {
         type: String,
+        required: true,
       }
     }
   ],
-  typing: [{
-    type: String,
-  }],
   users: [{
     type: String,
+    required: true,
+  }],
+  typing: [{
+    type: String,
+    required: true,
   }],
   password: {
     type: String,

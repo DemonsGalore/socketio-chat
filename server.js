@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 
 const { mongoURI } = require('./config/keys');
 
+const { Chat } = require('./models');
+const chat = require('./api/chat');
+
 // express initialization
 const app = express();
 app.disable('x-powered-by');
@@ -11,6 +14,9 @@ app.disable('x-powered-by');
 // express body-parser middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// use routes
+app.use('/api/chat', chat);
 
 // connect to MongoDB
 mongoose
@@ -31,6 +37,19 @@ mongoose
     io.on('connection', (socket) => {
       socket.on('message', (message) => {
         io.emit('message', message);
+      });
+
+      socket.on('create-new-chat', async (topic) => {
+        const newChat = new Chat({
+          topic,
+        });
+
+        try {
+          const result = await newChat.save();
+          io.emit('create-new-chat', result);
+        } catch (error) {
+          throw error;
+        }
       });
 
       socket.on('typing', (data) => {
