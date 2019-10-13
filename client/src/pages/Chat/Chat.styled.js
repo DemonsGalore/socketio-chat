@@ -10,6 +10,6 @@ export const StyledChat = styled.div`
     margin: 0.5rem 0;
   }
   li.active {
-    color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.secondary};
   }
 `;

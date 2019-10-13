@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const StyledNavigation = styled.nav`
   display: flex;
-  justify-content: end;
+  justify-content: flex-end;
 
   ul {
     list-style: none;
@@ -23,6 +23,6 @@ export const StyledNavigation = styled.nav`
   }
 
   ul a:hover {
-    color: ${({ theme }) => theme.accent};
+    color: ${({ theme }) => theme.secondary};
   }
 `;

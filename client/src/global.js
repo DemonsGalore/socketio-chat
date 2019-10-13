@@ -27,6 +27,6 @@ export default createGlobalStyle`
     padding: 1rem;
   }
   h1 {
-    color: ${({ theme }) => theme.secondary};
+    color: ${({ theme }) => theme.accent};
   }
 `;
