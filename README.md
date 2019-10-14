@@ -8,5 +8,5 @@ TODO:
 - check for unique usernames
 - password protected chats
 - highlight chats with new messages
-- disable empty messages
 - separat model for message?
+- vibrate API breaks app on Safari (iOS)

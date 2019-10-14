@@ -95,7 +95,7 @@ const Chat = () => {
           <button type="button" onClick={selectUsername}>select username</button>
         </div>
       :
-        <div>
+        <>
           {loading ?
             <Spinner />
           :
@@ -118,8 +118,9 @@ const Chat = () => {
               </div>
             </>
           }
-        </div>
+        </>
       }
+      {(usernameSelected && !chatEntered) && <h3>No chat selected</h3>}
       {chatEntered &&
         <>
           <div>
@@ -141,9 +142,13 @@ const Chat = () => {
               setTypingTimer();
             }} />
             <button type="button" className="btn-icon" onClick={() => {
-              sendChatAction({ user: username, message, topic: activeTopic });
-              userStoppedTyping({ user: username, topic: activeTopic });
-              setMessage('');
+              if (!isEmpty(message)) {
+                sendChatAction({ user: username, message, topic: activeTopic });
+                userStoppedTyping({ user: username, topic: activeTopic });
+                setMessage('');
+              } else {
+                navigator.vibrate([500]);
+              }
             }}><FontAwesomeIcon icon={faPaperPlane} size="2x" /></button>
           </div>
           <div>
