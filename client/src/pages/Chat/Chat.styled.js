@@ -12,4 +12,11 @@ export const StyledChat = styled.div`
   li.active {
     color: ${({ theme }) => theme.secondary};
   }
+
+  .btn-icon {
+    background: transparent;
+    border: none;
+    color: ${({ theme }) => theme.secondary};
+    padding: 0.25rem;
+  }
 `;

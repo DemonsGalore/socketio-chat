@@ -1,8 +1,14 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle, faExclamationCircle, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 
 import { Context } from '../../Store';
 import { StyledChat } from './Chat.styled';
 import { Spinner } from '../../components';
+import isEmpty from '../../util/is-empty';
 
 const Chat = () => {
   // context store
@@ -18,6 +24,7 @@ const Chat = () => {
   const [chatEntered, setChatEntered] = useState(false)
   const [activeTopic, setActiveTopic] = useState(topics[0]);
   const [timer, setTimer] = useState();
+  const [notification, setNotification] = useState({})
   
   let activeChat = allChats.find(chat => chat.topic === activeTopic);
   
@@ -29,11 +36,45 @@ const Chat = () => {
 
   const isFirstRender = useRef(true);
 
+  /*
   if (isFirstRender.current) {
     isFirstRender.current = false;
     fetchAllChats();
     setLoading(false);
   }
+  */
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      fetchAllChats();
+      setLoading(false);
+      isFirstRender.current = false;
+      return;
+    }
+
+    const toastConfig = {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: false,
+    };
+
+    if (!isEmpty(notification)) {
+      if (notification.success) {
+        toast.success(
+          <><FontAwesomeIcon icon={faCheckCircle} size="1x" />&nbsp;{notification.text}</>,
+          toastConfig
+        );
+      } else {
+        toast.error(
+          <><FontAwesomeIcon icon={faExclamationCircle} size="1x" />&nbsp;{notification.text}</>,
+          toastConfig
+        );
+      }
+    }
+  }, [notification]);
 
   // refresh timer while user is typing; send data to store after timeout
   const setTypingTimer = () => {
@@ -44,7 +85,12 @@ const Chat = () => {
   };
 
   const selectUsername = () => {
-    setUsernameSelected(true);
+    if (isEmpty(username)) {
+      setNotification({ text: 'Username empty', success: false });
+    } else {
+      // TODO: check for unique username
+      setUsernameSelected(true);
+    }
   };
 
   return (
@@ -75,7 +121,9 @@ const Chat = () => {
               </ul>
               <div>
                 <input type="text" value={newTopic} onChange={e => setNewTopic(e.target.value)} />
-                <button type="button" onClick={() => createNewChat(newTopic)}>create new chatroom</button>
+                <button type="button" className="btn-icon" onClick={() => createNewChat(newTopic)}>
+                  <FontAwesomeIcon icon={faPlus} size="2x" />
+                </button>
               </div>
             </>
           }
@@ -100,13 +148,24 @@ const Chat = () => {
             userTyping({ from: username, topic: activeTopic });
             setTypingTimer();
           }} />
-          <button type="button" onClick={() => {
+          <button type="button" className="btn-icon" onClick={() => {
             sendChatAction({ from: username, message, topic: activeTopic });
             userStoppedTyping({ from: username, topic: activeTopic });
             setMessage('');
-          }}>send</button>
+          }}><FontAwesomeIcon icon={faPaperPlane} size="2x" /></button>
         </div>
       }
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnVisibilityChange={false}
+        draggable={false}
+        pauseOnHover
+      />
     </StyledChat>
   );
 }
