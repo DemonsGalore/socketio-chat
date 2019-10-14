@@ -9,5 +9,4 @@ TODO:
 - password protected chats
 - highlight chats with new messages
 - disable empty messages
-- store messages in database
-
+- separat model for message?

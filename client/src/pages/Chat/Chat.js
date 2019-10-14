@@ -22,7 +22,7 @@ const Chat = () => {
   const [usernameSelected, setUsernameSelected] = useState(false)
   const [newTopic, setNewTopic] = useState('');
   const [chatEntered, setChatEntered] = useState(false)
-  const [activeTopic, setActiveTopic] = useState(topics[0]);
+  const [activeTopic, setActiveTopic] = useState('');
   const [timer, setTimer] = useState();
   const [notification, setNotification] = useState({})
   
@@ -36,22 +36,13 @@ const Chat = () => {
 
   const isFirstRender = useRef(true);
 
-  /*
   if (isFirstRender.current) {
-    isFirstRender.current = false;
     fetchAllChats();
     setLoading(false);
+    isFirstRender.current = false;
   }
-  */
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      fetchAllChats();
-      setLoading(false);
-      isFirstRender.current = false;
-      return;
-    }
-
     const toastConfig = {
       position: "bottom-right",
       autoClose: 3000,
@@ -80,7 +71,7 @@ const Chat = () => {
   const setTypingTimer = () => {
     clearTimeout(timer);
     setTimer(setTimeout(() => {
-      userStoppedTyping({ from: username, topic: activeTopic });
+      userStoppedTyping({ user: username, topic: activeTopic });
     }, 3000));
   };
 
@@ -129,31 +120,39 @@ const Chat = () => {
           }
         </div>
       }
-      {chatEntered && 
-        <div>
-          <h3>{activeTopic}</h3>
+      {chatEntered &&
+        <>
           <div>
-            {activeChat.messages.map((chat, i) => (
-              <div key={i}>
-                <label><strong>{chat.from}</strong></label>
-                {chat.message}
-              </div>
-            ))}
-          </div>
-          {isUserTyping && <div><em>
-            {activeChat.typing.length > 1 ? (activeChat.typing.join(', ') + ' are typing') : (activeChat.typing[0] + ' is typing')}
-          </em></div>}
+            <h3>{activeTopic}</h3>
+            <div>
+              {activeChat.messages.map((chat, i) => (
+                <div key={i}>
+                  <label><strong>{chat.user}</strong></label>
+                  {chat.message}
+                </div>
+              ))}
+            </div>
+            {isUserTyping && <div><em>
+              {activeChat.typing.length > 1 ? (activeChat.typing.join(', ') + ' are typing') : (activeChat.typing[0] + ' is typing')}
+            </em></div>}
 
-          <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyUp={() => {
-            userTyping({ from: username, topic: activeTopic });
-            setTypingTimer();
-          }} />
-          <button type="button" className="btn-icon" onClick={() => {
-            sendChatAction({ from: username, message, topic: activeTopic });
-            userStoppedTyping({ from: username, topic: activeTopic });
-            setMessage('');
-          }}><FontAwesomeIcon icon={faPaperPlane} size="2x" /></button>
-        </div>
+            <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyUp={() => {
+              userTyping({ user: username, topic: activeTopic });
+              setTypingTimer();
+            }} />
+            <button type="button" className="btn-icon" onClick={() => {
+              sendChatAction({ user: username, message, topic: activeTopic });
+              userStoppedTyping({ user: username, topic: activeTopic });
+              setMessage('');
+            }}><FontAwesomeIcon icon={faPaperPlane} size="2x" /></button>
+          </div>
+          <div>
+            <h3>User</h3>
+            <ul>
+              {activeChat.users.map(user => <li>{user}</li>)}
+            </ul>
+          </div>
+        </>
       }
       <ToastContainer
         position="bottom-right"

@@ -7,23 +7,23 @@ import isEmpty from './util/is-empty';
 export const Context = createContext();
 
 const reducer = (state, action) => {
-  const { from, message, topic } = action.payload;
+  const { user, message, topic } = action.payload;
   let index;
 
   switch (action.type) {
     case 'RECEIVE_MESSAGE':
       index = state.findIndex(chat => chat.topic === topic);
-      state[index].messages.push({ from, message });
+      state[index].messages.push({ user, message });
       return [...state];
     case 'USER_TYPING':
       index = state.findIndex(chat => chat.topic === topic);
-      if (!state[index].typing.includes(from)) {
-        state[index].typing.push(from);
+      if (!state[index].typing.includes(user)) {
+        state[index].typing.push(user);
       }
       return [...state];
     case 'USER_STOPPED_TYPING':
       index = state.findIndex(chat => chat.topic === topic);
-      state[index].typing.splice(state[index].typing.indexOf(from), 1);
+      state[index].typing.splice(state[index].typing.indexOf(user), 1);
       return [...state];
     case 'CREATE_NEW_CHAT':
       return [...state, action.payload];

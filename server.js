@@ -35,8 +35,19 @@ mongoose
     const io = socket(server);
 
     io.on('connection', (socket) => {
-      socket.on('message', (message) => {
-        io.emit('message', message);
+      socket.on('message', async (data) => {
+        const { user, message, topic } = data;
+
+        try {
+          await Chat.updateOne(
+            { topic },
+            { $push: { messages: { user, message } } },
+            {}
+          );
+          io.emit('message', data);
+        } catch (error) {
+          throw error;
+        }
       });
 
       socket.on('create-new-chat', async (topic) => {
