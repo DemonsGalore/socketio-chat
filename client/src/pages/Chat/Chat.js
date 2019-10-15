@@ -12,7 +12,7 @@ import isEmpty from '../../util/is-empty';
 
 const Chat = () => {
   // context store
-  const { allChats, sendChatAction, userTyping, userStoppedTyping, createNewChat, fetchAllChats } = useContext(Context);
+  const { allChats, sendChatAction, userTyping, userStoppedTyping, createNewChat, fetchAllChats, joinChat, leaveChat } = useContext(Context);
   const topics = allChats.map(chat => chat.topic);
 
   // local state
@@ -84,13 +84,34 @@ const Chat = () => {
     }
   };
 
+  const sendMessage = () => {
+    sendChatAction({ user: username, message, topic: activeTopic });
+    userStoppedTyping({ user: username, topic: activeTopic });
+    setMessage('');
+  };
+
+  const sendNewTopic = () => {
+    createNewChat(newTopic);
+    setNewTopic('');
+  }
+
+  // on page close
+  window.onbeforeunload = () => {
+    if (!isEmpty(activeChat)) {
+      leaveChat({ user: username, topic: activeTopic });
+    }
+  };
+
   return (
     <StyledChat>
       <h1>Chat</h1>
       {!usernameSelected ?
         <div>
           <label>Username: </label>
-          <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
+          <input type="text" value={username} onKeyPress={e => {
+            if (e.key === 'Enter') {
+              selectUsername();
+            }}} onChange={e => setUsername(e.target.value)} />
           <br />
           <button type="button" onClick={selectUsername}>select username</button>
         </div>
@@ -103,16 +124,24 @@ const Chat = () => {
               <ul>
                 {topics.map(topic => (
                 <li key={topic} onClick={e => {
+                  if (!isEmpty(activeChat)) {
+                    leaveChat({ user: username, topic: activeTopic });
+                  }
                   setActiveTopic(e.target.innerText);
                   setChatEntered(true);
+                  joinChat({ user: username, topic: e.target.innerText });
                 }} className={topic === activeTopic ? 'active' : undefined}>
                   {topic}
                 </li>
                 ))}
               </ul>
               <div>
-                <input type="text" value={newTopic} onChange={e => setNewTopic(e.target.value)} />
-                <button type="button" className="btn-icon" onClick={() => createNewChat(newTopic)}>
+                <input type="text" value={newTopic} onKeyPress={e => {
+                  if (e.key === 'Enter') {
+                    sendNewTopic();
+                  }
+                }} onChange={e => setNewTopic(e.target.value)} />
+                <button type="button" className="btn-icon" onClick={sendNewTopic}>
                   <FontAwesomeIcon icon={faPlus} size="2x" />
                 </button>
               </div>
@@ -137,15 +166,22 @@ const Chat = () => {
               {activeChat.typing.length > 1 ? (activeChat.typing.join(', ') + ' are typing') : (activeChat.typing[0] + ' is typing')}
             </em></div>}
 
-            <input type="text" value={message} onChange={e => setMessage(e.target.value)} onKeyUp={() => {
-              userTyping({ user: username, topic: activeTopic });
-              setTypingTimer();
+            <input type="text" value={message} onKeyPress={e => {
+            if (e.key === 'Enter') {
+              if (!isEmpty(message)) {
+                sendMessage();
+              } else {
+                navigator.vibrate([500]);
+              }
+            }}} onChange={e => setMessage(e.target.value)} onKeyUp={() => {
+              if (!isEmpty(message)) {
+                userTyping({ user: username, topic: activeTopic });
+                setTypingTimer();
+              }
             }} />
             <button type="button" className="btn-icon" onClick={() => {
               if (!isEmpty(message)) {
-                sendChatAction({ user: username, message, topic: activeTopic });
-                userStoppedTyping({ user: username, topic: activeTopic });
-                setMessage('');
+                sendMessage();
               } else {
                 navigator.vibrate([500]);
               }
@@ -154,7 +190,7 @@ const Chat = () => {
           <div>
             <h3>User</h3>
             <ul>
-              {activeChat.users.map(user => <li>{user}</li>)}
+              {activeChat.users.map(user => <li key={user}>{user}</li>)}
             </ul>
           </div>
         </>

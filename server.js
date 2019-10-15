@@ -70,6 +70,34 @@ mongoose
       socket.on('stopped-typing', (data) => {
         socket.broadcast.emit('stopped-typing', data);
       });
+
+      socket.on('user-joined-chat', async (data) => {
+        const { user, topic } = data;
+        try {
+          await Chat.updateOne(
+            { topic },
+            { $push: { users: user } },
+            {}
+          );
+          io.emit('user-joined-chat', data);
+        } catch (error) {
+          throw error;
+        }
+      });
+
+      socket.on('user-left-chat', async (data) => {
+        const { user, topic } = data;
+        try {
+          await Chat.updateOne(
+            { topic },
+            { $pull: { users: user } },
+            {}
+          );
+          io.emit('user-left-chat', data);
+        } catch (error) {
+          throw error;
+        }
+      });
     });
   })
   .catch(error => console.log("Error", error));

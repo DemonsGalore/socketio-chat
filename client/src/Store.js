@@ -29,7 +29,17 @@ const reducer = (state, action) => {
       return [...state, action.payload];
     case 'SET_CHAT_DATA':
       return [...action.payload];
-    default:
+    case 'USER_JOINED_CHAT':
+      index = state.findIndex(chat => chat.topic === topic);
+      if (!state[index].users.includes(user)) {
+        state[index].users.push(user);
+      }
+      return [...state];
+    case 'USER_LEFT_CHAT':
+      index = state.findIndex(chat => chat.topic === topic);
+      state[index].users.splice(state[index].users.indexOf(user), 1);
+      return [...state];
+  default:
       return state;
   }
 };
@@ -46,6 +56,14 @@ const userTyping = (data) => {
 
 const userStoppedTyping = (data) => {
   socket.emit('stopped-typing', data);
+};
+
+const joinChat = (data) => {
+  socket.emit('user-joined-chat', data);
+};
+
+const leaveChat = (data) => {
+  socket.emit('user-left-chat', data);
 };
 
 const createNewChat = (data) => {
@@ -88,10 +106,18 @@ const Store = (props) => {
     socket.on('create-new-chat', (chat) => {
       dispatch({ type: 'CREATE_NEW_CHAT', payload: chat });
     });
+
+    socket.on('user-joined-chat', (data) => {
+      dispatch({ type: 'USER_JOINED_CHAT', payload: data });
+    });
+
+    socket.on('user-left-chat', (data) => {
+      dispatch({ type: 'USER_LEFT_CHAT', payload: data });
+    });
   }
 
   return (
-    <Context.Provider value={{allChats, sendChatAction, userTyping, userStoppedTyping, createNewChat, fetchAllChats}}>
+    <Context.Provider value={{allChats, sendChatAction, userTyping, userStoppedTyping, createNewChat, fetchAllChats, joinChat, leaveChat}}>
       {props.children}
     </Context.Provider>
   );
