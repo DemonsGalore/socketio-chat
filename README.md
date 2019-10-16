@@ -1,4 +1,4 @@
-# video-streaming-chat
+# chat
 
 TODO:
 - show user who joined/left chat / on timeout (especially on mobile)
