@@ -1,4 +1,4 @@
-# chat
+# socket-io chat
 
 TODO:
 - show user who joined/left chat / on timeout (especially on mobile)
