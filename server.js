@@ -36,6 +36,8 @@ mongoose
 
     io.on('connection', (socket) => {
       socket.on('message', async (data) => {
+        io.emit('message', data);
+
         const { user, message, topic } = data;
 
         try {
@@ -44,7 +46,6 @@ mongoose
             { $push: { messages: { user, message } } },
             {}
           );
-          io.emit('message', data);
         } catch (error) {
           throw error;
         }
@@ -72,32 +73,36 @@ mongoose
       });
 
       socket.on('user-joined-chat', async (data) => {
+        io.emit('user-joined-chat', data);
+
         const { user, topic } = data;
+
         try {
           await Chat.updateOne(
             { topic },
             { $push: { users: user } },
             {}
           );
-          io.emit('user-joined-chat', data);
         } catch (error) {
           throw error;
         }
       });
 
       socket.on('user-left-chat', async (data) => {
+        io.emit('user-left-chat', data);
+
         const { user, topic } = data;
+
         try {
           await Chat.updateOne(
             { topic },
             { $pull: { users: user } },
             {}
           );
-          io.emit('user-left-chat', data);
         } catch (error) {
           throw error;
         }
       });
     });
   })
-  .catch(error => console.log("Error", error));
+  .catch(error => console.log('Error', error));

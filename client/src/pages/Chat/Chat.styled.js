@@ -1,6 +1,10 @@
 import styled from 'styled-components';
 
 export const StyledChat = styled.div`
+  #chat-wrapper {
+    display: grid;
+    grid-template-columns: 15rem 1fr 15rem;
+  }
   ul {
     list-style: none;
     padding: 0;

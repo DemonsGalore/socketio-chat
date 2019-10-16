@@ -7,7 +7,6 @@ const Navigation = () => {
     <StyledNavigation>
       <ul>
         <li><NavLink to="/chat">Chat</NavLink></li>
-        <li><NavLink to="/videostreaming">VideoStreaming</NavLink></li>
       </ul>
     </StyledNavigation>
   );

@@ -105,6 +105,7 @@ const Chat = () => {
   return (
     <StyledChat>
       <h1>Chat</h1>
+      <div id="chat-wrapper">
       {!usernameSelected ?
         <div>
           <label>Username: </label>
@@ -116,7 +117,7 @@ const Chat = () => {
           <button type="button" onClick={selectUsername}>select username</button>
         </div>
       :
-        <>
+        <div>
           {loading ?
             <Spinner />
           :
@@ -147,7 +148,7 @@ const Chat = () => {
               </div>
             </>
           }
-        </>
+        </div>
       }
       {(usernameSelected && !chatEntered) && <h3>No chat selected</h3>}
       {chatEntered &&
@@ -157,7 +158,7 @@ const Chat = () => {
             <div>
               {activeChat.messages.map((chat, i) => (
                 <div key={i}>
-                  <label><strong>{chat.user}</strong></label>
+                  <label><strong>{chat.user} </strong></label>
                   {chat.message}
                 </div>
               ))}
@@ -195,6 +196,7 @@ const Chat = () => {
           </div>
         </>
       }
+      </div>
       <ToastContainer
         position="bottom-right"
         autoClose={3000}

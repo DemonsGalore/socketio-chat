@@ -1,16 +1,16 @@
 {
-  "name": "video-streaming-chat",
+  "name": "socketio-chat",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.7.4",
+    "mongoose": "^5.7.5",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
     "concurrently": "^5.0.0",
-    "nodemon": "^1.19.3"
+    "nodemon": "^1.19.4"
   },
   "scripts": {
     "start": "node server.js",
