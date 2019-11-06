@@ -1,5 +1,9 @@
 # socket-io chat
 
+npm install in root folder for backend and /client for frontend
+create keys_dev.js in /config with URI to MongoDV
+start application with "npm run dev"
+
 TODO:
 - show user who joined/left chat / on timeout (especially on mobile)
 - sort users by name
